@@ -27,7 +27,7 @@ struct VolumeListView: View {
                 )
             } else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 20) {
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
                         ForEach(volumes) { volume in
                             NavigationLink {
                                 ReaderView(book: book, volumeFileName: volume.id)
@@ -88,7 +88,7 @@ private struct VolumeCardView: View {
     let volume: VolumeItem
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(alignment: .center, spacing: 8) {
             RoundedRectangle(cornerRadius: 8)
                 .fill(
                     LinearGradient(
@@ -112,6 +112,7 @@ private struct VolumeCardView: View {
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
                             .lineLimit(3)
+                            .minimumScaleFactor(0.8)
                             .padding(.horizontal, 6)
 
                         if volume.chapterCount > 0 {
@@ -128,6 +129,7 @@ private struct VolumeCardView: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.primary)
+                .frame(height: 32, alignment: .top)
         }
     }
 }
