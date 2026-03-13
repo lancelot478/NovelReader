@@ -14,4 +14,5 @@ alwaysApply: true
 #   - 使用 SwiftData 代替 Core Data（iOS 17+）
 
 # Config.xcconfig — 使用自定义变量 APP_BUNDLE_IDENTIFIER / APP_VERSION / APP_BUILD，通过 $(...) 引用方式解决 xcodegen 覆盖问题
+# 每次修改完后，构建完没报错即可，不需调用xcrun simctl 测试
 
