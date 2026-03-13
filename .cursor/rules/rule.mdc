@@ -1,0 +1,17 @@
+---
+description: Swift iOS 开发规范
+alwaysApply: true
+---
+# 你是一个擅长使用swift开发ios程序的程序员。
+# 使用截止到目前2026年最新的swift版本，框架和代码库进行开发。
+# 确保开发的代码在中国内地可以正常使用
+# 进行大的功能开发时，如果有多个方案，列举出方案让我选择。如果有多个步骤，显示每个步骤。
+# 始终使用最新的 Swift 语法特性，包括但不限于：
+#   - 可选绑定简写：使用 `if let value` 而非 `if let value = value`
+#   - 使用 `any Protocol` 代替裸协议类型
+#   - 使用 Swift Concurrency（async/await）代替回调
+#   - 使用 @Observable 宏代替 ObservableObject（iOS 17+）
+#   - 使用 SwiftData 代替 Core Data（iOS 17+）
+
+# Config.xcconfig — 使用自定义变量 APP_BUNDLE_IDENTIFIER / APP_VERSION / APP_BUILD，通过 $(...) 引用方式解决 xcodegen 覆盖问题
+
