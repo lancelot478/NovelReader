@@ -4,13 +4,17 @@ import SwiftUI
 @Observable
 class ReaderViewModel {
     var chapters: [Chapter] = []
-    var currentChapterIndex: Int = 0
-    var pages: [String] = []
+    var renderedPages: [AttributedString] = []
     var currentPageIndex: Int = 0
     var showSettings = false
     var showChapterList = false
 
-    private var shouldGoToLastPage = false
+    /// Maps each page index to its chapter index
+    private(set) var pageToChapter: [Int] = []
+    /// Maps each chapter index to its first page index
+    private(set) var chapterFirstPage: [Int] = []
+
+    var totalPages: Int { renderedPages.count }
 
     var fontSize: CGFloat = 18 {
         didSet { UserDefaults.standard.set(Double(fontSize), forKey: "readerFontSize") }
@@ -22,18 +26,20 @@ class ReaderViewModel {
         didSet { UserDefaults.standard.set(theme.rawValue, forKey: "readerTheme") }
     }
 
-    var currentChapter: Chapter? {
-        guard chapters.indices.contains(currentChapterIndex) else { return nil }
-        return chapters[currentChapterIndex]
+    var currentChapterIndex: Int {
+        guard pageToChapter.indices.contains(currentPageIndex) else { return 0 }
+        return pageToChapter[currentPageIndex]
     }
 
     var chapterTitle: String {
-        currentChapter?.title ?? ""
+        let idx = currentChapterIndex
+        guard chapters.indices.contains(idx) else { return "" }
+        return chapters[idx].title
     }
 
     var currentPageContent: AttributedString {
-        guard pages.indices.contains(currentPageIndex) else { return AttributedString("") }
-        return MarkdownParser.renderMarkdown(pages[currentPageIndex])
+        guard renderedPages.indices.contains(currentPageIndex) else { return AttributedString("") }
+        return renderedPages[currentPageIndex]
     }
 
     init() {
@@ -75,58 +81,79 @@ class ReaderViewModel {
             chapters = loadChaptersFromFolder(bookPath)
         }
 
-        currentChapterIndex = min(book.lastReadChapterIndex, max(chapters.count - 1, 0))
         book.totalChapters = chapters.count
+        savedChapterIndex = min(book.lastReadChapterIndex, max(chapters.count - 1, 0))
     }
+
+    /// Stored to restore position after pagination
+    private var savedChapterIndex: Int = 0
 
     // MARK: - Pagination
 
-    func paginateCurrentChapter(in size: CGSize) {
-        guard let chapter = currentChapter else {
-            pages = []
+    func paginateAll(in size: CGSize) {
+        guard !chapters.isEmpty, size.width > 0, size.height > 0 else {
+            renderedPages = []
+            pageToChapter = []
+            chapterFirstPage = []
             return
         }
-        let fullText = "**\(chapter.title)**\n\n\(chapter.content)"
-        pages = TextPaginator.paginate(
-            fullText,
-            fontSize: fontSize,
-            lineSpacing: lineSpacing,
-            pageSize: size
-        )
-        if shouldGoToLastPage {
-            currentPageIndex = max(0, pages.count - 1)
-            shouldGoToLastPage = false
+
+        var allRendered: [AttributedString] = []
+        var allPageToChapter: [Int] = []
+        var allChapterFirstPage: [Int] = []
+
+        for (chapterIdx, chapter) in chapters.enumerated() {
+            allChapterFirstPage.append(allRendered.count)
+
+            let fullText = "**\(chapter.title)**\n\n\(chapter.content)"
+            let rawPages = TextPaginator.paginate(
+                fullText,
+                fontSize: fontSize,
+                lineSpacing: lineSpacing,
+                pageSize: size
+            )
+
+            for raw in rawPages {
+                allRendered.append(MarkdownParser.renderMarkdown(raw))
+                allPageToChapter.append(chapterIdx)
+            }
+        }
+
+        renderedPages = allRendered
+        pageToChapter = allPageToChapter
+        chapterFirstPage = allChapterFirstPage
+
+        if chapterFirstPage.indices.contains(savedChapterIndex) {
+            currentPageIndex = chapterFirstPage[savedChapterIndex]
         } else {
             currentPageIndex = 0
         }
+        savedChapterIndex = 0
+    }
+
+    func repaginate(in size: CGSize) {
+        let oldChapterIdx = currentChapterIndex
+        savedChapterIndex = oldChapterIdx
+        paginateAll(in: size)
     }
 
     // MARK: - Page Navigation
 
     func nextPage() {
-        if currentPageIndex < pages.count - 1 {
-            currentPageIndex += 1
-        } else if currentChapterIndex < chapters.count - 1 {
-            currentChapterIndex += 1
-        }
+        guard currentPageIndex < renderedPages.count - 1 else { return }
+        currentPageIndex += 1
     }
 
     func previousPage() {
-        if currentPageIndex > 0 {
-            currentPageIndex -= 1
-        } else if currentChapterIndex > 0 {
-            shouldGoToLastPage = true
-            currentChapterIndex -= 1
-        }
+        guard currentPageIndex > 0 else { return }
+        currentPageIndex -= 1
     }
 
     // MARK: - Chapter Navigation (for chapter list)
 
     func goToChapter(_ index: Int) {
-        guard chapters.indices.contains(index) else { return }
-        shouldGoToLastPage = false
-        currentChapterIndex = index
-        currentPageIndex = 0
+        guard chapterFirstPage.indices.contains(index) else { return }
+        currentPageIndex = chapterFirstPage[index]
     }
 
     func saveProgress(for book: Book) {

@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 struct Chapter: Equatable {
     let title: String
@@ -16,7 +16,13 @@ enum MarkdownParser {
         do {
             var options = AttributedString.MarkdownParsingOptions()
             options.interpretedSyntax = .inlineOnlyPreservingWhitespace
-            return try AttributedString(markdown: text, options: options)
+            var result = try AttributedString(markdown: text, options: options)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.paragraphSpacing = 5
+            result.mergeAttributes(
+                AttributeContainer([.paragraphStyle: paragraphStyle])
+            )
+            return result
         } catch {
             return AttributedString(text)
         }
