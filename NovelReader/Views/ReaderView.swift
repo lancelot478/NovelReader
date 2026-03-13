@@ -19,12 +19,19 @@ private struct DisableSwipeBack: UIViewControllerRepresentable {
 struct ReaderView: View {
     let book: Book
     var volumeFileName: String? = nil
+    var initialPageIndex: Int? = nil
     @State private var viewModel = ReaderViewModel()
     @State private var showOverlay = false
     @State private var contentSize: CGSize = .zero
     @State private var dragOffset: CGFloat = 0
+    @State private var pullDownOffset: CGFloat = 0
+    @State private var isDraggingVertical: Bool? = nil
     @State private var isAnimating = false
+    @State private var isCurrentPageBookmarked = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
+    private let pullDownThreshold: CGFloat = 120
 
     var body: some View {
         GeometryReader { geometry in
@@ -46,7 +53,13 @@ struct ReaderView: View {
                 } else if viewModel.renderedPages.isEmpty {
                     ProgressView()
                 } else {
-                    slidingPages(viewWidth: viewWidth)
+                    ZStack(alignment: .top) {
+                        bookmarkIndicator
+                            .offset(y: -60 + pullDownOffset)
+
+                        slidingPages(viewWidth: viewWidth)
+                            .offset(y: pullDownOffset)
+                    }
                 }
 
                 if showOverlay, !viewModel.chapters.isEmpty {
@@ -55,8 +68,15 @@ struct ReaderView: View {
             }
             .onAppear {
                 contentSize = pageSize
+                viewModel.bookFileName = book.fileName
+                viewModel.volumeFileName = volumeFileName
                 viewModel.loadBook(book, volumeFileName: volumeFileName)
                 viewModel.paginateAll(in: pageSize)
+                if let target = initialPageIndex,
+                   viewModel.renderedPages.indices.contains(target) {
+                    viewModel.currentPageIndex = target
+                }
+                refreshBookmarkState()
             }
             .onChange(of: geometry.size) { _, newSize in
                 let newPageSize = CGSize(width: newSize.width - 40, height: newSize.height - 60)
@@ -70,6 +90,9 @@ struct ReaderView: View {
             .onChange(of: viewModel.lineSpacing) {
                 viewModel.repaginate(in: contentSize)
             }
+            .onChange(of: viewModel.currentPageIndex) {
+                refreshBookmarkState()
+            }
         }
         .background(DisableSwipeBack())
         .navigationBarBackButtonHidden(true)
@@ -82,6 +105,38 @@ struct ReaderView: View {
         .sheet(isPresented: $viewModel.showChapterList) {
             ChapterListView(viewModel: viewModel)
         }
+    }
+
+    // MARK: - Bookmark Indicator
+
+    private var bookmarkIndicator: some View {
+        let triggered = pullDownOffset >= pullDownThreshold
+        let label: String
+        if isCurrentPageBookmarked {
+            label = triggered ? "松开取消书签" : "下拉取消书签"
+        } else {
+            label = triggered ? "松开添加书签" : "下拉添加书签"
+        }
+
+        return HStack(spacing: 8) {
+            Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
+                .font(.title3)
+            Text(label)
+                .font(.subheadline)
+        }
+        .foregroundStyle(triggered ? .white : .white.opacity(0.7))
+        .frame(maxWidth: .infinity)
+        .frame(height: 60)
+        .background(
+            (isCurrentPageBookmarked
+                ? Color.red.opacity(triggered ? 0.85 : 0.6)
+                : Color.accentColor.opacity(triggered ? 0.85 : 0.6)
+            )
+        )
+    }
+
+    private func refreshBookmarkState() {
+        isCurrentPageBookmarked = viewModel.isBookmarked(in: modelContext)
     }
 
     // MARK: - Sliding Pages
@@ -108,13 +163,35 @@ struct ReaderView: View {
                 .onChanged { value in
                     guard !isAnimating else { return }
                     let dx = value.translation.width
-                    let atStart = viewModel.currentPageIndex == 0 && dx > 0
-                    let atEnd = viewModel.currentPageIndex >= viewModel.totalPages - 1 && dx < 0
-                    dragOffset = (atStart || atEnd) ? dx * 0.15 : dx
+                    let dy = value.translation.height
+
+                    if isDraggingVertical == nil {
+                        isDraggingVertical = dy > 0 && abs(dy) > abs(dx) * 1.5
+                    }
+
+                    if isDraggingVertical == true {
+                        pullDownOffset = max(0, min(dy, pullDownThreshold + 30))
+                    } else {
+                        let atStart = viewModel.currentPageIndex == 0 && dx > 0
+                        let atEnd = viewModel.currentPageIndex >= viewModel.totalPages - 1 && dx < 0
+                        dragOffset = (atStart || atEnd) ? dx * 0.15 : dx
+                    }
                 }
                 .onEnded { value in
                     guard !isAnimating else { return }
-                    handleDragEnded(value, viewWidth: viewWidth)
+                    defer { isDraggingVertical = nil }
+
+                    if isDraggingVertical == true {
+                        if pullDownOffset >= pullDownThreshold {
+                            viewModel.toggleBookmark(in: modelContext)
+                            refreshBookmarkState()
+                        }
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            pullDownOffset = 0
+                        }
+                    } else {
+                        handleDragEnded(value, viewWidth: viewWidth)
+                    }
                 }
         )
         .simultaneousGesture(

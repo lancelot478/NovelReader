@@ -11,9 +11,11 @@
 		41652A4ED6964D8E7D3C53B2 /* ReaderSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD06E63286A3D5D1E296A06 /* ReaderSettingsView.swift */; };
 		425B41CA21018F8D3C475355 /* NovelReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5468FFD2CE9D9E4CDBA357 /* NovelReaderApp.swift */; };
 		47D96C53022852AEC1D06E36 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B9913C74AA3B94B5C1028C /* ContentView.swift */; };
+		5597BA8A7D16741D8C4DF8F0 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59CED2EAEF9DA023F7DF80D1 /* Bookmark.swift */; };
 		6DD897C174CAFC429F940E33 /* ReaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BDAF39FDF45114144ABBD40 /* ReaderViewModel.swift */; };
 		81B962145421CE2ADD5FFB49 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCF86F581624EC1FD97282C6 /* Assets.xcassets */; };
 		9509198E785BDC74BB81ED93 /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2638A275910D8F94938A7E3A /* ReaderView.swift */; };
+		9D543DE4C13C3DAE66E80527 /* BookmarkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F14D2C693C5CCFDDEBAC0FEF /* BookmarkListView.swift */; };
 		A93941A37B94E9F6BB7FC599 /* ChapterListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1038D47530C4E60F15883ABE /* ChapterListView.swift */; };
 		E3F79582E2341E31F34F55B0 /* VolumeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5811C7ED554A0276969D9E01 /* VolumeListView.swift */; };
 		E4D7933E040B842CC5340D26 /* Books in Resources */ = {isa = PBXBuildFile; fileRef = CF064D1A1D5329B466E937B3 /* Books */; };
@@ -32,11 +34,13 @@
 		2F529F0496C00F10A12C962A /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
 		51D74D3C235CD57D52DF4300 /* NovelReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5811C7ED554A0276969D9E01 /* VolumeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeListView.swift; sourceTree = "<group>"; };
+		59CED2EAEF9DA023F7DF80D1 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
 		84BE9D5ECE56104E6EEC8C18 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		AD5468FFD2CE9D9E4CDBA357 /* NovelReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelReaderApp.swift; sourceTree = "<group>"; };
 		BFD06E63286A3D5D1E296A06 /* ReaderSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderSettingsView.swift; sourceTree = "<group>"; };
 		CCF86F581624EC1FD97282C6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CF064D1A1D5329B466E937B3 /* Books */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Books; path = NovelReader/Books; sourceTree = SOURCE_ROOT; };
+		F14D2C693C5CCFDDEBAC0FEF /* BookmarkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkListView.swift; sourceTree = "<group>"; };
 		F4B9913C74AA3B94B5C1028C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				2F529F0496C00F10A12C962A /* Book.swift */,
+				59CED2EAEF9DA023F7DF80D1 /* Bookmark.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -110,6 +115,7 @@
 		FDFF60BD8399CAA973627E5D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				F14D2C693C5CCFDDEBAC0FEF /* BookmarkListView.swift */,
 				1C519B20F04F55A3335388BD /* BookshelfView.swift */,
 				1038D47530C4E60F15883ABE /* ChapterListView.swift */,
 				BFD06E63286A3D5D1E296A06 /* ReaderSettingsView.swift */,
@@ -186,6 +192,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				195C11CD3DB9B21ACA703944 /* Book.swift in Sources */,
+				5597BA8A7D16741D8C4DF8F0 /* Bookmark.swift in Sources */,
+				9D543DE4C13C3DAE66E80527 /* BookmarkListView.swift in Sources */,
 				EA8537BFF8E74EBE00A17970 /* BookshelfView.swift in Sources */,
 				A93941A37B94E9F6BB7FC599 /* ChapterListView.swift in Sources */,
 				47D96C53022852AEC1D06E36 /* ContentView.swift in Sources */,

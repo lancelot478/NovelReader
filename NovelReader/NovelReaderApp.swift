@@ -7,6 +7,6 @@ struct NovelReaderApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: Book.self)
+        .modelContainer(for: [Book.self, Bookmark.self])
     }
 }

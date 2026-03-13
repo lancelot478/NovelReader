@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @MainActor
 @Observable
@@ -158,6 +159,44 @@ class ReaderViewModel {
 
     func saveProgress(for book: Book) {
         book.lastReadChapterIndex = currentChapterIndex
+    }
+
+    // MARK: - Bookmarks
+
+    var bookFileName: String = ""
+    var volumeFileName: String?
+
+    func isBookmarked(in context: ModelContext) -> Bool {
+        let pageIdx = currentPageIndex
+        let bookFile = bookFileName
+        let volFile = volumeFileName
+        let predicate = #Predicate<Bookmark> {
+            $0.bookFileName == bookFile && $0.volumeFileName == volFile && $0.pageIndex == pageIdx
+        }
+        let descriptor = FetchDescriptor<Bookmark>(predicate: predicate)
+        return (try? context.fetchCount(descriptor)) ?? 0 > 0
+    }
+
+    func toggleBookmark(in context: ModelContext) {
+        let pageIdx = currentPageIndex
+        let bookFile = bookFileName
+        let volFile = volumeFileName
+        let predicate = #Predicate<Bookmark> {
+            $0.bookFileName == bookFile && $0.volumeFileName == volFile && $0.pageIndex == pageIdx
+        }
+        let descriptor = FetchDescriptor<Bookmark>(predicate: predicate)
+
+        if let existing = try? context.fetch(descriptor), !existing.isEmpty {
+            for item in existing { context.delete(item) }
+        } else {
+            let bookmark = Bookmark(
+                bookFileName: bookFileName,
+                volumeFileName: volumeFileName,
+                pageIndex: pageIdx,
+                chapterTitle: chapterTitle
+            )
+            context.insert(bookmark)
+        }
     }
 
     // MARK: - Folder Loading
